@@ -33,6 +33,7 @@ public class WordCountApp2 {
         job.setMapperClass(WordCountMapper.class);
         job.setReducerClass(WordCountReducer.class);
 
+
         //添加Combiner的设置，实际上就是一次Reducer操作
         job.setCombinerClass(WordCountReducer.class);
 

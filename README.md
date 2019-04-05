@@ -102,7 +102,7 @@ Apache社区的顶级项目：xxxx.apache.org
 * rm ifcfg-lo  删除ifcfg-lo文件
 * ip addr  在2：ens33中有一个link/ether地址串将其copy
 * vi  ifcfg-eth0   更改HWADDR的值为刚才复制的值<br>
-![网络配置]($resource/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE.jpg)<br>
+![网络配置](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE.jpg)<br>
 * 解压hadoop安装包（CDH压缩包）
 * 配置hadoop的核心文件 hadoop-env.sh，core-site.xml , mapred-site.xml ， hdfs-site.xml
 * 配置hadoop环境变量
@@ -135,7 +135,7 @@ Apache社区的顶级项目：xxxx.apache.org
 #### 四、Hadoop简介
 
 Hadoop：提供分布式的存储（一个文件被拆分成很多个块，并且以副本的方式存储在各个节点中）和计算，是一个分布式的系统基础架构：用户可以在不了解分布式底层细节的情况下进行使用。去IoE(IBM、Orcale、EMC）。<br>
-![Hadoop]($resource/Hadoop.PNG)<br>
+![Hadoop](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/Hadoop.PNG)<br>
 分布式文件系统：HDFS实现将文件分布式存储在很多的服务器上<br>
 分布式计算框架：MapReduce实现在很多机器上分布式并行计算<br>
 分布式资源调度框架：YARN实现集群资源管理以及作业的调度<br>
@@ -183,11 +183,11 @@ a.txt   block1：128M, 192.168.199.1<br>
          block2：22M ,  192.168.199.2<br>
 get a.txt<br>
 这个过程对于用户来说是不感知的。<br>
-![HDFS架构]($resource/HDFS%E6%9E%B6%E6%9E%84.PNG)
+![HDFS架构](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/HDFS%E6%9E%B6%E6%9E%84.PNG)
 
 **_副本机制_**<br>
 将一个文件切分，除了最后一个块的大小不一样，其他块大小都是一样的。副本数默认为3，但是可以更改。<br>
-![副本机制]($resource/%E5%89%AF%E6%9C%AC%E6%9C%BA%E5%88%B6.PNG)
+![副本机制](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E5%89%AF%E6%9C%AC%E6%9C%BA%E5%88%B6.PNG)
 <br>
 **Hadoop(HDFS)安装**<br>
 	下载<br>
@@ -268,17 +268,18 @@ hadoop fs [generic options]<br>
 	[-text [-ignoreCrc] <src> ...]<br>
 
 **_hadoop常用命令：_**
-hadoop fs -ls /  *************显示当前目录下的所有文件 -R层层循出文件夹<br>
-hadoop fs -put   *************将文件上传到HDFS<br> 
-hadoop fs -copyFromLocal*************将文件从本地拷贝到HDFS，但是源文件还在<br> 
-hadoop fs -moveFromLocal*************将文件从本地拷贝到HDFS，但是源文件不存在<br>
-hadoop fs -cat*************查看文件<br>
-hadoop fs -text**************将文本文件或某些格式的非文本文件通过文本格式输出<br>
-hadoop fs -get****************复制文件到本地，可以忽略crc校验<br>
+
+hadoop fs -ls / -------------------------显示当前目录下的所有文件 -R层层循出文件夹<br>
+hadoop fs -put   -------------------------将文件上传到HDFS<br> 
+hadoop fs -copyFromLocal-------------------------将文件从本地拷贝到HDFS，但是源文件还在<br> 
+hadoop fs -moveFromLocal -------------------------将文件从本地拷贝到HDFS，但是源文件不存在<br>
+hadoop fs -cat -------------------------查看文件<br>
+hadoop fs -text -------------------------将文本文件或某些格式的非文本文件通过文本格式输出<br>
+hadoop fs -get -------------------------复制文件到本地，可以忽略crc校验<br>
 hadoop fs -mkdir <br>
-hadoop fs -mv  ***********目标文件不能存在，否则命令不能执行，相当于给文件重命名并保存，源文件不存在<br>
-hadoop fs -getmerge**********************************将hdfs指定目录下所有文件排序后合并到local指定的文件中，文件不存在时会自动创建，文件存在时会覆盖里面的内容<br>
-hadoop fs -rm***********************创建文件夹 后跟-p 可以创建不存在的父路径<br>
+hadoop fs -mv   -------------------------目标文件不能存在，否则命令不能执行，相当于给文件重命名并保存，源文件不存在<br>
+hadoop fs -getmerge  -------------------------将hdfs指定目录下所有文件排序后合并到local指定的文件中，文件不存在时会自动创建，文件存在时会覆盖里面的内容<br>
+hadoop fs -rm    -------------------------创建文件夹 后跟-p 可以创建不存在的父路径<br>
 hadoop fs -rmdir<br>
 hadoop fs -rm -r<br>
 
@@ -299,13 +300,13 @@ hadoop fs -rm -r<br>
 #### 七、MapReduce（计算）
 源自Google的MapReduce论文，MapReduce是Google MapReduce的克隆版，特点：扩展性高，容错性强，海量离线数据处理。
 例子：
-![wordcount]($resource/wordcount.PNG)
+![wordcount](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/wordcount.PNG)
 
 
 #### 八、YARN（调度）
 YARN：Yet Another Resource Negotiator<br>
 负责整个集群资源的管理和调度。特点：扩展性高，容错性强，多资源统一调度。
-![YARN]($resource/YARN.PNG)
+![YARN](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/YARN.PNG)
 
 
 

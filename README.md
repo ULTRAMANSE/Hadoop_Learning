@@ -293,9 +293,36 @@ hadoop fs -rm -r<br>
 	使用Maven来管理项目[pom.xml](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/pom.xml)<br>
 		拷贝jar包<br>
   
-#### 六、使用Java API操作HDFS
-[HDFSApp.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/test/java/com/imooc/bigdata/hadoop/hdfs/HDFSApp.java)<br>
+#### 六、使用Java API操作HDFS进行实战
+1. HDFS API编程之jUnit封装实现增删改查[HDFSApp.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/test/java/com/imooc/bigdata/hadoop/hdfs/HDFSApp.java)<br>
+2. 使用HDFS Java API完成HDFS文件系统上的文件的词频统计，仅仅只能使用HDFS API 完成<br>
+ 分析：
+ 
+```
+/**
+ * 使用HDFS API完成wordcount统计
+ *
+ * 需求：统计HDFS上的文件的wc，然后将统计结果输出到HDFS
+ *
+ * 功能拆解：
+ * 1）读取HDFS上的文件 ==> HDFS API
+ * 2）业务处理(词频统计)：对文件中的每一行数据都要进行业务处理（按照分隔符分割） ==> Mapper
+ * 3）将处理结果缓存起来   ==> Context
+ * 4）将结果输出到HDFS ==> HDFS API
+ *
+ */
+```
 
+<br>
+    * [HDFSWCApp1](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/HDFSWCApp1.java)<br>
+    * [ImoocContext](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocContext.java)<br>
+    * [ImoocMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocMapper.java)<br>
+    * [WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/WordCountMapper.java)<br>
+
+使用自定义配置文件重构代码：上述的代码称为硬编码，我们应让其具有可重用性，因此进行重构。<br>
+* [wc.properties](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/resources/wc.properties)<br>
+* [Constants](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/Constants.java)<br>
+* [ParamsUtils.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ParamsUtils.java)<br>
 
 #### 七、MapReduce（计算）
 源自Google的MapReduce论文，MapReduce是Google MapReduce的克隆版，特点：扩展性高，容错性强，海量离线数据处理。

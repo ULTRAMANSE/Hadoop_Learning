@@ -102,7 +102,7 @@ Apache社区的顶级项目：xxxx.apache.org
 * rm ifcfg-lo  删除ifcfg-lo文件
 * ip addr  在2：ens33中有一个link/ether地址串将其copy
 * vi  ifcfg-eth0   更改HWADDR的值为刚才复制的值<br>
-![网络配置](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE.jpg)<br>
+![网络配置](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE.PNG)<br>
 * 解压hadoop安装包（CDH压缩包）
 * 配置hadoop的核心文件 hadoop-env.sh，core-site.xml , mapred-site.xml ， hdfs-site.xml
 * 配置hadoop环境变量

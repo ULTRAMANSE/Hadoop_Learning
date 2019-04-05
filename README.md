@@ -292,7 +292,20 @@ hadoop fs -rm -r<br>
 	Java <br>
 	使用Maven来管理项目[pom.xml](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/pom.xml)<br>
 		拷贝jar包<br>
-  
+
+**客户端向HDFS写数据流程**
+![HDFS写数据流程](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/HDFS%E5%86%99%E6%95%B0%E6%8D%AE.PNG)
+<br>
+
+**客户端向HDFS读取数据流程**
+![HDFS读取数据流程](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/HDFS%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE.PNG)
+<br>
+
+**HDFS元数据管理**
+* 元数据：HDFS的目录结构以及每个文件的BLOCK信息(id，副本系数、block存放在哪个DN上)
+* 存在什么地方：对应配置 ${hadoop.tmp.dir}/name/......
+* 元数据存放在文件中
+
 #### 六、使用Java API操作HDFS进行实战
 1. HDFS API编程之jUnit封装实现增删改查[HDFSApp.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/test/java/com/imooc/bigdata/hadoop/hdfs/HDFSApp.java)<br>
 2. 使用HDFS Java API完成HDFS文件系统上的文件的词频统计，仅仅只能使用HDFS API 完成<br>
@@ -315,20 +328,43 @@ hadoop fs -rm -r<br>
 
 <br>
 
-[HDFSWCApp1](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/HDFSWCApp1.java)<br>
-[ImoocContext](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocContext.java)<br>
-[ImoocMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocMapper.java)<br>
-[WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/WordCountMapper.java)<br>
+* [HDFSWCApp1](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/HDFSWCApp1.java)<br>
+* [ImoocContext](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocContext.java)<br>
+* [ImoocMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocMapper.java)<br>
+* [WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/WordCountMapper.java)<br>
 
 使用自定义配置文件重构代码：上述的代码称为硬编码，我们应让其具有可重用性，因此进行重构。<br>
 * [wc.properties](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/resources/wc.properties)<br>
 * [Constants](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/Constants.java)<br>
 * [ParamsUtils.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ParamsUtils.java)<br>
+* [CaseIgnoreWordCountMapper.java](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/CaseIgnoreWordCountMapper.java)<br>
 
 #### 七、MapReduce（计算）
 源自Google的MapReduce论文，MapReduce是Google MapReduce的克隆版，特点：扩展性高，容错性强，海量离线数据处理。
-例子：
-![wordcount](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/wordcount.PNG)
+
+**MapReduce编程模型的详解**
+
+**_例子：_**
+![wordcount例子](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/wordCount%E4%BE%8B%E5%AD%90.PNG)
+<br>
+1. 步骤：<br>
+* 准备map处理的输入数据
+* Map阶段将每一行读取的数据拆开，并且为每个单词出现的此数赋值。
+* Shuffling阶段，将map阶段中各个任务进行总结，将相同的单词归并在一起。
+* Reduce阶段，将Shuffling阶段的各个部分进行合并，统计次数。
+![MP处理图示](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/MP%E5%A4%84%E7%90%86%E5%9B%BE%E7%A4%BA.PNG)
+<br>
+
+**_核心_**
+* Split
+* InputFormat
+* OutputFormat
+* Combiner
+* Partitioner
+
+**_实战_**
+[wordCountApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountApp.java)
+<br>
 
 
 #### 八、YARN（调度）

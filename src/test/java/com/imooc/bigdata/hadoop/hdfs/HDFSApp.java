@@ -23,8 +23,10 @@ import java.net.URI;
  * 3）...就是你的HDFS API的操作
  */
 public class HDFSApp {
-
-    public static final String HDFS_PATH = "hdfs://hadoop000:8020";//如果此处报错，请查看自己的linux是否做了用户名和地址映射
+    
+    //使用的是纯linux系统而不是虚拟机的话，如果此处报错，请查看自己的linux是否做了用户名和地址映射
+    //如果使用的是虚拟机，那么这里的地址必须写成虚拟机配置的IP地址
+    public static final String HDFS_PATH = "hdfs://hadoop000:8020";
     FileSystem fileSystem = null;
     Configuration configuration = null;
 
@@ -35,6 +37,7 @@ public class HDFSApp {
 
 
         configuration = new Configuration();
+        //创建副本数为1，如果不设置，就会默认加载hdfs_default.xml文件，默认副本数为3
         configuration.set("dfs.replication","1");
 
         /**

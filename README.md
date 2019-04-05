@@ -314,10 +314,10 @@ hadoop fs -rm -r<br>
 ```
 
 <br>
-    * [HDFSWCApp1](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/HDFSWCApp1.java)<br>
-    * [ImoocContext](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocContext.java)<br>
-    * [ImoocMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocMapper.java)<br>
-    * [WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/WordCountMapper.java)<br>
+[HDFSWCApp1](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/HDFSWCApp1.java)<br>
+[ImoocContext](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocContext.java)<br>
+[ImoocMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/ImoocMapper.java)<br>
+[WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/imooc/bigdata/hadoop/hdfs/WordCountMapper.java)<br>
 
 使用自定义配置文件重构代码：上述的代码称为硬编码，我们应让其具有可重用性，因此进行重构。<br>
 * [wc.properties](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/resources/wc.properties)<br>

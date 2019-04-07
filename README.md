@@ -362,10 +362,37 @@ hadoop fs -rm -r<br>
 * Combiner
 * Partitioner
 
-**_实战_**
-[wordCountApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountApp.java)
+**_实战1，词频统计_**<br>
+
+* 词频统计，相同单词的次数统计[WordCountMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountMapper.java)
+* 对Map阶段的内容进行统计[WordCountReducer](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountReducer.java)
+* Job的编写[wordCountApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountApp.java)
+* 本地Job的编写[WordCountApp2](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountApp2.java)
+使用Combiner来减少IO，提升作业的执行性能<br>
+局限性就是求平均数的时候。<br>
+![Combiner示意图](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/Combiner.PNG)<br>
+* Cobiner编写[WordCountApp2](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/wc/WordCountCombinerApp.java)
+
 <br>
 
+
+**_实战2，流量统计_**<br>
+1. 日志文件：https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/access/Input/access.log
+2. 需求：统计上行流量和、下行流量和、总流量和
+3. Access.java：手机号、上行流量、下行流量、总流量
+4. 根据手机号进行分组，然后把该手机号对应的上行流量和下行流量加起来
+5. Mapper：把手机号、上行流量、下行流量 拆开，把手机号作为key，把Access作为Value写出去
+6. Reducer：（1372623888，<Access,Access>）
+
+自定义复杂数据类型：[Access](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/Access.java)<br>
+
+自定义Mapper：[AccessMapper](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/AccessMapper.java)<br>
+
+自定义Reducer：[AccessReducer](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/AccessReducer.java)<br>
+
+Job：[AccessLocalApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/AccessLocalApp.java)<br>
+
+[AccessPartition](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/AccessPartition.java) <br>
 
 #### 八、YARN（调度）
 YARN：Yet Another Resource Negotiator<br>

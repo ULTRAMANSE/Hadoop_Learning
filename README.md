@@ -183,7 +183,9 @@ a.txt   block1：128M, 192.168.199.1<br>
          block2：22M ,  192.168.199.2<br>
 get a.txt<br>
 这个过程对于用户来说是不感知的。<br>
+
 ![HDFS架构](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/HDFS%E6%9E%B6%E6%9E%84.PNG)
+
 
 **_副本机制_**<br>
 将一个文件切分，除了最后一个块的大小不一样，其他块大小都是一样的。副本数默认为3，但是可以更改。<br>
@@ -399,8 +401,496 @@ YARN：Yet Another Resource Negotiator<br>
 负责整个集群资源的管理和调度。特点：扩展性高，容错性强，多资源统一调度。
 ![YARN](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/YARN.PNG)
 
+ARN产生背景<br>
+	MapReduce1.x ==> MapReduce2.x<br>
+		master/slave : JobTracker/TaskTracker<br>
+		JobTracker：单点、压力大<br>
+		仅仅只能够支持mapreduce作业<br>
+
+	资源利用率<br>
+		所有的计算框架运行在一个集群中，共享一个集群的资源，按需分配！<br>
+
+<br>
+master: resource management：ResourceManager (RM)<br>
+job scheduling/monitoring：per-application ApplicationMaster (AM)<br>
+slave: NodeManager (NM)<br>
+
+
+YARN架构<br>
+	Client、ResourceManager、NodeManager、ApplicationMaster<br>
+	master/slave: RM/NM<br>
+
+
+<br>
+Client: 向RM提交任务、杀死任务等<br>
+ApplicationMaster：<br>
+	每个应用程序对应一个AM<br>
+	AM向RM申请资源用于在NM上启动对应的Task<br>
+	数据切分<br>
+	为每个task向RM申请资源（container）<br>
+	NodeManager通信<br>
+	任务的监控<br>
+
+NodeManager： 多个<br>
+	干活<br>
+	向RM发送心跳信息、任务的执行情况<br>
+	接收来自RM的请求来启动任务<br>
+	处理来自AM的命令<br>
+
+ResourceManager:集群中同一时刻对外提供服务的只有1个，负责资源相关<br>
+	处理来自客户端的请求：提交、杀死<br>
+	启动/监控AM<br>
+	监控NM<br>
+	资源相关<br>
+
+container：任务的运行抽象<br>
+	memory、cpu....<br>
+	task是运行在container里面的<br>
+	可以运行am、也可以运行map/reduce task<br>
 
 
 
+将上一节的流量统计案例使用YARN来发布：<br>
+提交自己开发的MR作业到YARN上运行的步骤：<br>
+1）使用IDEA将项目打包，打成一个JAR包
+2）使用Xshell将jar包(项目根目录/target/...jar)以及测试数据上传到服务器<br>
+3) 把数据上传到HDFS<br>
+	hadoop fs -put xxx hdfspath<br>
+4) 执行作业<br>
+	hadoop jar xxx.jar 完整的类名(包名+类名) 数据文件输入地址  数据文件执行完后的输出地址<br>.	
+5) 到YARN UI(8088) 上去观察作业的运行情况<br>
+6）到输出目录去查看对应的输出结果<br>
+
+[AccessYARNApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/access/AccessYARNApp.java) 
+<br>
 
 
+#### 九、电商项目实战————用户行为日志分析
+
+**什么是用户行为日志：**<br>
+	用户的每一次访问的行为(访问、搜索)产生的日志<br>
+	比如电商网站从历史订单    ==>历史行为数据 <br>
+				==>再进行推荐<br>
+				==>就是为了增加平台的订单量/率<br>
+
+
+本项目中的日志样图，因为此日志文件过大，放不到github上，因此现在只显示一部分<br>
+
+![日志文件](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E6%97%A5%E5%BF%97.PNG)
+<br>
+**原始日志字段说明:**(本项目中主要要用到的字段)
+	第二个字段：url<br>
+	第十四字段：ip<br>
+	第十八字段：time<br>
+
+==> 字段的解析<br>
+	ip => 地市：国家、省份、城市<br>
+	url => 页面ID<br>
+
+	referer<br>
+
+**项目需求：**<br>
+统计页面的浏览量<br>
+统计各个省份的浏览量<br>
+统计页面的访问量<br>
+<br>
+
+**整个项目的数据处理流程：**<br>
+![流程图](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B.PNG)
+<br>
+
+**第一个版本**
+页面浏览量统计功能：[PVStatApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr/PVStatApp.java)将一行数据做成一个固定的key，value值为1<br>
+
+**统计各个省份的浏览量**<br>
+select province count(1) from xxx group by province;<br>
+ip如何转换成地市信息，使用一个开源工具[IP地址解析工具包](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/utils/IPParser.java)<br>
+自定义日志文件解析类[LogParser](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/utils/LogParser.java)
+<br>
+开发MapReduce：
+[ProvinceStatApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr/ProvinceStatApp.java)
+
+
+**统计页面浏览量**<br>
+把符合规则的pageID获取到，然后进行统计<br>
+[PageStatApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr/PageStatApp.java)
+
+存在的问题，每个MR作业都去全量读取待处理的原始日志，如果数据量很大，那么性能就会降低。<br>
+使用ETL将原始数据进行相应的处理，解析相应的数据，去除一些不需要的字段<br>
+[ETLApp](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr2/ETLApp.java) 
+将上面的需求的实现进行改版：<br>
+[PVStatV2App](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr2/PVStatV2App.java) <br>
+[ProvinceStatV2App](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr2/ProvinceStatV2App.java) <br>
+[PageStatV2App](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/src/main/java/com/immoc/bigdata/hadoop/mr/project/mr2/PageStatV2App.java)<br>
+
+可以使用Sqoop把HDFS上统计结果导出MySQL上面<br>
+
+#### 十、Hive数据仓库
+
+**Hive产生背景**
+wordcount案例中使用MR会写大量的代码，这非常的麻烦，不利于效率，传统web开发人员也需要使用SQL来直接操作。<br>
+HDFS上的文件并没有schema的概念<br>
+	schema？就是关系型数据库中有数据库名，表名和字段这些数据。而HDFS就是普通的文本，使用Hive可对HDFS使用SQL操作，有很大的便捷性<br>
+
+**hive是什么**
+有FaceBook开源，用于解决结构化日志数据统计，可进行读写和管理。构建在Hadoop之上的数据仓库。Hive提供SQL查询语句：HQL。<br>
+Hive底层执行引擎支持：MapReduce/Spark（在haoop2.x默认为Spark）/Tez<br>
+
+**为什么要使用Hive**
+1. 简单、容易上手，为超大数据集设计的计算/扩展能力
+2. 提供统一元数据管理：
+	* Hive数据是存放在HDFS
+	* 元数据信息(记录数据的数据)是存放在MySQL中
+	* SQL on Hadoop： Hive、Spark SQL、impala....
+
+**Hive体系架构**
+	* client：shell、thrift/jdbc(server/jdbc)、WebUI(HUE/Zeppelin)
+	* metastore：==> MySQL
+		* database：name、location、owner....
+		* table：name、location、owner、column name/type ....
+![Hive架构](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/Hive%E6%9E%B6%E6%9E%84.PNG)
+
+**Hive部署**
+	1）下载
+	2）解压到~/app
+	3）添加HIVE_HOME到系统环境变量,source 让文件生效./bash_profile。echo HIVE_HOME。
+	4）修改配置
+		hive-env.sh
+		hive-site.xml
+	5) 拷贝MySQL驱动包到$HIVE_HOME/lib
+	6) 前提是要准备安装一个MySQL数据库，yum install去安装一个MySQL数据库[Mysql安装](https://www.cnblogs.com/julyme/p/5969626.html)
+<br>
+![Hive部署架构](https://github.com/Zhang-Yixuan/Hadoop_Learning/blob/master/resource/Hive%E9%83%A8%E7%BD%B2%E6%9E%B6%E6%9E%84.PNG)
+
+```xml
+
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+<property>
+  <name>javax.jdo.option.ConnectionURL</name>
+  <value>jdbc:mysql://hadoop000:3306/hadoop_hive?createDatabaseIfNotExist=true</value>
+</property>
+
+<property>
+  <name>javax.jdo.option.ConnectionDriverName</name>
+  <value>com.mysql.jdbc.Driver</value>
+</property>
+
+<property>
+  <name>javax.jdo.option.ConnectionUserName</name>
+  <value>root</value>
+</property>
+
+<property>
+  <name>javax.jdo.option.ConnectionPassword</name>
+  <value>root</value>
+</property>
+</configuration>
+
+```
+
+**Hive和Mysql的使用：**<br><br>
+mysql -uroot -proot  进入到数据库，两个root分别代表用户名和密码<br>
+进入Hive目录下的bin中，直接输入hive，启动Hive，启动完了后会出现一个hive>，启动Hive前必须将所有的Hadoop相关程序启动起来<br>
+hive> create database test_db;<br>
+mysql>show databases; 就显示出hadoop_hive;<br>
+mysql>use hadoop_hive;  使用这个hadoop_hive数据库<br>
+mysql>show tables;  显示这个数据库中的表，里面大概有20张表，是hive的<br>
+hive>use test_db;<br>
+hive>show tables;<br>
+hive>create table helloworld(id int , name string) row format delimited fields terminated by '\t';hive中创建表，后面的语句必须写<br>
+hive>load data local inpath '文件所在目录/文件名' overwrite into table hellworld；将数据文件写入到数据表中<br>
+hive>select count(1) from helloword;进行统计，统计的时候会转换成MR作业，在YARN的web界面上可以查看到sql语句和结果<br>
+
+**Hive的DDL**：Hive Data Definition Language<br>
+与关系型数据库中的语句非常相似：create、delete、alter...<br>
+
+**Hive数据抽象/结构**<br>
+>>>>>>>	database     HDFS一个目录<br>
+>>>>>>>>>>>>>>>>table    HDFS一个目录<br>
+>>>>>>>>>>>>>>>>>>>>>>>>>data  文件 <br>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>partition 分区表  HDFS一个目录<br>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>data  文件 <br>
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><br><br>bucket  分桶   HDFS一个文件<br>
+
+
+CREATE (DATABASE|SCHEMA) [IF NOT EXISTS] database_name<br>
+  [COMMENT database_comment]<br>
+  [LOCATION hdfs_path]<br>
+  [WITH DBPROPERTIES (property_name=property_value, ...)];<br>
+<br>
+CREATE DATABASE IF NOT EXISTS hive;<br>
+
+CREATE DATABASE IF NOT EXISTS hive2 LOCATION '/test/location';<br>
+
+
+CREATE DATABASE IF NOT EXISTS hive3 <br>
+WITH DBPROPERTIES('creator'='pk');<br>
+
+/user/hive/warehouse是Hive默认的存储在HDFS上的路径<br>
+
+CREATE TABLE emp(<br>
+empno int,<br>
+ename string,<br>
+job string,<br>
+mgr int,<br>
+hiredate string,<br>
+sal double,<br>
+comm double,<br>
+deptno int<br>
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';<br>
+
+LOAD DATA LOCAL INPATH '/home/hadoop/data/emp.txt' OVERWRITE INTO TABLE emp;<br><br>
+
+
+
+CREATE [TEMPORARY] [EXTERNAL] TABLE [IF NOT EXISTS] [db_name.]table_name    -- (Note: TEMPORARY available in Hive 0.14.0 and later)<br><br>
+  [(col_name data_type [COMMENT col_comment], ... [constraint_specification])]<br><br>
+  [COMMENT table_comment]<br><br>
+  [PARTITIONED BY (col_name data_type [COMMENT col_comment], ...)]<br><br>
+  [CLUSTERED BY (col_name, col_name, ...) [SORTED BY (col_name [ASC|DESC], ...)] INTO num_buckets BUCKETS]<br><br>
+  [SKEWED BY (col_name, col_name, ...)                  -- (Note: Available in Hive 0.10.0 and later)]<br><br>
+     ON ((col_value, col_value, ...), (col_value, col_value, ...), ...)<br><br>
+     [STORED AS DIRECTORIES]<br><br>
+  [
+   [ROW FORMAT row_format] <br><br>
+   [STORED AS file_format]<br><br>
+     | STORED BY 'storage.handler.class.name' [WITH SERDEPROPERTIES (...)]  -- (Note: Available in Hive 0.6.0 and later)<br><br>
+  ]
+  [LOCATION hdfs_path]<br><br>
+  [TBLPROPERTIES (property_name=property_value, ...)]   -- (Note: Available in Hive 0.6.0 and later)<br><br>
+  [AS select_statement];   -- (Note: Available in Hive 0.5.0 and later; not supported for external tables)<br><br>
+
+
+LOAD DATA [LOCAL] INPATH 'filepath' [OVERWRITE] INTO TABLE tablename [PARTITION (partcol1=val1, partcol2=val2 ...)]<br><br>
+
+LOCAL：本地系统，如果没有local那么就是指的HDFS的路径<br><br>
+OVERWRITE：是否数据覆盖，如果没有那么就是数据追加<br><br>
+<br><br>
+LOAD DATA LOCAL INPATH '/home/hadoop/data/emp.txt' OVERWRITE INTO TABLE emp;<br><br>
+
+LOAD DATA INPATH 'hdfs://hadoop000:8020/data/emp.txt' INTO TABLE emp;<br><br>
+
+INSERT OVERWRITE LOCAL DIRECTORY '/tmp/hive/'<br><br>
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'<br><br>
+select empno,ename,sal,deptno from emp;<br><br>
+
+
+聚合： max/min/sum/avg<br><br>
+
+分组函数： group by<br><br>
+	求每个部门的平均工资<br><br>
+	出现在select中的字段，如果没有出现在聚合函数里，那么一定要实现在group by里<br><br>
+	select deptno, avg(sal) from emp group by deptno;<br>
+
+	求每个部门、工作岗位的平均工资<br>
+	select deptno,job avg(sal) from emp group by deptno,job;<br>
+
+
+	求每个部门的平均工资大于2000的部门<br>
+	select deptno, avg(sal) avg_sal from emp group by deptno where avg_sal>2000;<br>
+
+	对于分组函数过滤要使用having<br>
+select deptno, avg(sal) avg_sal from emp group by deptno having avg_sal>2000;	<br>
+
+
+
+join ： 多表<br>
+
+emp<br>
+dept<br>
+
+
+CREATE TABLE dept(<br>
+deptno int,<br>
+dname string,<br>
+loc string<br>
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';<br>
+
+LOAD DATA LOCAL INPATH '/home/hadoop/data/dept.txt' OVERWRITE INTO TABLE dept;<br>
+
+explain EXTENDED<br>
+select <br>
+e.empno,e.ename,e.sal,e.deptno,d.dname<br>
+from emp e join dept d<br>
+on e.deptno=d.deptno;<br>
+
+**Hive外部表**<br>
+
+CREATE TABLE emp(<br>
+empno int,<br>
+ename string,<br>
+job string,
+mgr int,<br>
+hiredate string,<br>
+sal double,<br>
+comm double,<br>
+deptno int<br>
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';<br>
+
+LOAD DATA LOCAL INPATH '/home/hadoop/data/emp.txt' OVERWRITE INTO TABLE emp;<br>
+
+MANAGED_TABLE:内部表<br>
+删除表：HDFS上的数据被删除 & Meta也被删除<br>
+<br>
+CREATE EXTERNAL TABLE emp_external(<br>
+empno int,<br>
+ename string,<br>
+job string,<br>
+mgr int,<br>
+hiredate string,<br>
+sal double,<br>
+comm double,<br>
+deptno int<br>
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'<br>
+location '/external/emp/';<br>
+
+LOAD DATA LOCAL INPATH '/home/hadoop/data/emp.txt' OVERWRITE INTO TABLE emp_external;<br>
+
+
+EXTERNAL_TABLE<br>
+	HDFS上的数据不被删除 & Meta被删除<br>
+
+
+分区表<br>
+
+create external table track_info(<br>
+ip string,<br>
+country string,<br>
+province string,<br>
+city string,<br>
+url string,<br>
+time string,<br>
+page string<br>
+) partitioned by (day string)<br>
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'<br>
+location '/project/trackinfo/';<br>
+
+crontab表达式进行调度<br>
+Azkaban调度：ETLApp==>其他的统计分析 <br>
+	PySpark及调度系统<br>
+		https://coding.imooc.com/class/chapter/249.html#Anchor<br>
+
+
+LOAD DATA INPATH 'hdfs://hadoop000:8020/project/input/etl' OVERWRITE INTO TABLE track_info partition(day='2013-07-21');<br>
+
+select count(*) from track_info where day='2013-07-21'  ;<br>
+
+select province,count(*) as cnt from track_info where day='2013-07-21' group by province ;<br>
+
+
+
+省份统计表<br>
+create table track_info_province_stat(<br>
+province string,<br>
+cnt bigint<br>
+) partitioned by (day string)<br>
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';<br>
+
+insert overwrite table track_info_province_stat partition(day='2013-07-21') <br>
+select province,count(*) as cnt from track_info where day='2013-07-21' group by province ;<br>
+
+到现在为止，我们统计的数据已经在Hive表track_info_province_stat<br>
+而且这个表是一个分区表，后续统计报表的数据可以直接从这个表中查询<br>
+也可以将hive表的数据导出到RDBMS（sqoop）<br>
+
+
+1）ETL<br>
+2）把ETL输出的数据加载到track_info分区表里<br>
+3）各个维度统计结果的数据输出到各自维度的表里（track_info_province_stat）<br>
+4）将数据导出（optional）<br>
+
+
+如果一个框架不能落地到SQL层面，这个框架就不是一个非常适合的框架<br>
+
+
+#### Hadoop集群布置
+Hadoop集群规划<br>
+	HDFS: NN DN<br>
+	YARN: RM NM<br>
+
+hadoop000 192.168.199.234<br>
+	NN RM<br>
+	DN NM<br>
+hadoop001 192.168.199.235<br>
+	DN NM<br>
+hadoop002 192.168.199.236<br>
+	DN NM<br>
+
+(每台)<br>
+/etc/hostname: 修改hostname(hadoop000/hadoop001/hadoop002)<br>
+/etc/hosts： ip和hostname的映射关系<br>
+	192.168.199.234 hadoop000<br>
+	192.168.199.235 hadoop001<br>
+	192.168.199.236 hadoop002<br>
+	192.168.199.234 localhost<br>
+
+
+前置安装 ssh<br>
+(每台)ssh免密码登陆：ssh-keygen -t rsa<br>
+在hadoop000机器上进行caozuo <br>
+ssh-copy-id -i ~/.ssh/id_rsa.pub hadoop000<br>
+ssh-copy-id -i ~/.ssh/id_rsa.pub hadoop001<br>
+ssh-copy-id -i ~/.ssh/id_rsa.pub hadoop002<br>
+
+
+JDK安装<br>
+1）先在hadoop000机器上部署了jdk<br>
+2）将jdk bin配置到系统环境变量<br>
+3）将jdk拷贝到其他节点上去(从hadoop000机器出发)<br>
+scp -r jdk1.8.0_91 hadoop@hadoop001:~/app/<br>
+scp -r jdk1.8.0_91 hadoop@hadoop002:~/app/<br>
+<br>
+scp ~/.bash_profile hadoop@hadoop001:~/<br>
+scp ~/.bash_profile hadoop@hadoop002:~/<br>
+
+Hadoop部署<br>
+1）hadoop-env.sh<br>
+	JAVA_HOME<br>
+2) core-site.xml<br>
+<property><br>
+	<name>fs.default.name</name><br>
+	<value>hdfs://hadoop000:8020</value><br>
+</property><br>
+
+3) hdfs-site.xml
+<property><br>
+  <name>dfs.namenode.name.dir</name><br>
+  <value>/home/hadoop/app/tmp/dfs/name</value><br>
+</property><br>
+<br>
+<property><br>
+  <name>dfs.datanode.data.dir</name><br>
+  <value>/home/hadoop/app/tmp/dfs/data</value><br>
+</property><br>
+
+4) yarn-site.xml<br>
+<property><br>
+  <name>yarn.nodemanager.aux-services</name><br>
+  <value>mapreduce_shuffle</value><br>
+ </property>
+<br>
+<property><br>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>hadoop000</value><br>
+</property><br>
+5) mapred-site.xml<br>
+<property><br>
+	<name>mapreduce.framework.name</name><br>
+	<value>yarn</value><br>
+</property><br>
+
+6) slaves<br>
+
+7) 分发hadoop到其他机器<br>
+scp -r hadoop-2.6.0-cdh5.15.1 hadoop@hadoop001:~/app/<br>
+scp -r hadoop-2.6.0-cdh5.15.1 hadoop@hadoop002:~/app/<br>
+
+scp ~/.bash_profile hadoop@hadoop001:~/<br>
+scp ~/.bash_profile hadoop@hadoop002:~/
+<br>
+8) NN格式化： hadoop namenode -format<br>
+9) 启动HDFS<br>
+10) 启动YARN<br>

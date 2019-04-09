@@ -608,12 +608,12 @@ hive>select count(1) from helloword;进行统计，统计的时候会转换成MR
 与关系型数据库中的语句非常相似：create、delete、alter...<br>
 
 **Hive数据抽象/结构**<br>
->>>>>>>	database     HDFS一个目录<br>
->>>>>>>>>>>>>>>>table    HDFS一个目录<br>
->>>>>>>>>>>>>>>>>>>>>>>>>data  文件 <br>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>partition 分区表  HDFS一个目录<br>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>data  文件 <br>
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>><br><br>bucket  分桶   HDFS一个文件<br>
+database     HDFS一个目录<br>
+table    HDFS一个目录<br>
+data  文件 <br>
+partition 分区表  HDFS一个目录<br>
+data  文件 <br>
+bucket  分桶   HDFS一个文件<br>
 
 
 CREATE (DATABASE|SCHEMA) [IF NOT EXISTS] database_name<br>

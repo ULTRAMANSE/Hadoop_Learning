@@ -24,47 +24,50 @@ import java.net.URI;
  */
 public class HDFSApp {
     
-    //使用的是纯linux系统而不是虚拟机的话，如果此处报错，请查看自己的linux是否做了用户名和地址映射
-    //如果使用的是虚拟机，那么这里的地址必须写成虚拟机配置的IP地址
-    public static final String HDFS_PATH = "hdfs://hadoop000:8020";
-    FileSystem fileSystem = null;
+    /**在操作HDFS之前，我们需要对三个参数进行定义。
+    1.HDFS所在路径，我们要对HDFS进行操作，因此必须找到其对应的路径上
+     2.因为是对文件系统操作，因此我们需要File类，但是这个类必须是由Hadoop提供，有区别于Java自己的File操作类。
+     这个操作类，需要接收到文件系统所在地址，，接收到configuration对象的参数，hadoop所在Linux中的用户名称
+     3.其次，我们需要定义一个Configure对象，这个对象也是由Hadoop提供的,需要用来设置数据备份数量。
+     在IDEA开发中，如果不设置，会默认定义为3个。因为，IDEA中导入的hadoop-client包中有一个默认的设置是3.
+     **/
+    public static final String PATH = "hdfs://192.168.227.14:8020";
+    //用来设置参数
     Configuration configuration = null;
-
+    //用来针对hdfs进行文件操作，即访问HDFS的客户端对象
+    FileSystem fileSystem = null;
 
     @Before
-    public void setUp() throws Exception {
-        System.out.println("--------setUp---------");
+    public void setUp() throws  Exception{
 
+        System.out.println("-------setup--------");
 
+        //通过configuration来设置hdfs文件备份数量
         configuration = new Configuration();
-        //创建副本数为1，如果不设置，就会默认加载hdfs_default.xml文件，默认副本数为3
         configuration.set("dfs.replication","1");
 
-        /**
-         * 构造一个访问指定HDFS系统的客户端对象
-         * 第一个参数：HDFS的URI
-         * 第二个参数：客户端指定的配置参数
-         * 第三个参数：客户端的身份，说白了就是用户名
-         */
-        fileSystem = FileSystem.get(new URI(HDFS_PATH), configuration, "hadoop");
-    }
-
-
-    /**
-     * 创建HDFS文件夹
-     */
-    @Test
-    public void mkdir() throws Exception {
-        fileSystem.mkdirs(new Path("/hdfsapi/test"));
+        fileSystem = FileSystem.get(new URI(PATH),configuration,"hadoop");
     }
 
     /**
-     * 查看HDFS内容
+     * 通过filesystem对象来操作HDFS.
+     * mkdir()方法用来在HDFS中创建一个文件夹，此方法中需要设置文件夹创建的路径
+     * 这个文件夹里如果为空，那么在Linux中的使用hadoop fs -ls，是无法显示这个文件夹的存在
+     * 但是可以通过浏览器进行地址访问，能够查看到这个空的文件夹
+     *
      */
     @Test
-    public void text()throws Exception {
-        FSDataInputStream in = fileSystem.open(new Path("/cdh_version.properties"));
-        IOUtils.copyBytes(in, System.out, 1024);
+    public void mkdir() throws  Exception{
+        fileSystem.mkdirs(new Path("/hdfsapi/test/zyx"));
+    }
+
+    /**
+     * 查看hdfs中内容，使用数据流对文件进行读取
+     */
+    @Test
+    public void read() throws Exception{
+        FSDataInputStream inputStream = fileSystem.open(new Path("/cdh_version.properties"));
+        IOUtils.copyBytes(inputStream,System.out,1024);
     }
 
     /**
